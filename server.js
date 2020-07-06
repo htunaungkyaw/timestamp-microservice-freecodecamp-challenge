@@ -24,16 +24,42 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
+const checkDate = (val) => {
+  if (new Date(val).toString() === "Invalid Date") {
+    if (Number.isInteger(+val)) {
+      return +val;
+    } else {
+      return "Invalid Date";
+    }
+  } else {
+    return new Date(val);
+  }
+};
+
 app.get("/api/timestamp/:date?", (req, res) => {
   const { date } = req.params;
-  const res_Date = new Date(date);
-  console.log();
   if (!date) {
-    res.json({ unix: +new Date(), utc: new Date().toISOString() });
-  } else if (moment(date, "YYYY-MM-DD").isValid()) {
-    res.json({ unix: +res_Date, utc: res_Date.toUTCString() });
+    res.json({
+      unix: +new Date(),
+      utc: new Date().toUTCString(),
+    });
   } else {
-    res.json({ error: "Invalid Date" });
+    let tmp = checkDate(date);
+    if (checkDate(date) === "Invalid Date") {
+      res.json({
+        error: "Invalid Date",
+      });
+    } else if (Number.isInteger(checkDate(date))) {
+      res.json({
+        unix: tmp,
+        utc: new Date(tmp).toUTCString(),
+      });
+    } else {
+      res.json({
+        unix: +new Date(tmp),
+        utc: new Date(tmp).toUTCString(),
+      });
+    }
   }
 });
 
